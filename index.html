@@ -528,6 +528,133 @@
     }
     .copy-toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* ─── DIM TRANSITION ─── */
+    #screen-dim-intro {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+    }
+    #screen-dim-intro.active { display: flex; }
+    .dim-intro-progress {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    .dim-intro-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .dim-intro-step-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      color: var(--muted);
+      background: var(--card);
+      transition: all 0.4s;
+    }
+    .dim-intro-step-dot.done {
+      color: white;
+      border-color: transparent;
+    }
+    .dim-intro-step-dot.next {
+      color: white;
+      border-color: transparent;
+      transform: scale(1.2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .dim-intro-step-label {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .dim-intro-step-label.next { color: var(--text); font-weight: 700; }
+    .dim-connector {
+      width: 24px; height: 2px;
+      background: var(--border);
+      margin-top: 17px;
+      flex-shrink: 0;
+      transition: background 0.4s;
+    }
+    .dim-connector.done { background: var(--primary); }
+    .dim-intro-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 40px 32px;
+      box-shadow: var(--shadow);
+      max-width: 440px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+    .dim-intro-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 20px;
+      color: white;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .dim-intro-icon { font-size: 52px; margin-bottom: 16px; }
+    .dim-intro-name {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .dim-intro-desc {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .dim-intro-ab {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .dim-intro-ab-item {
+      flex: 1;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12px;
+      text-align: left;
+    }
+    .dim-intro-ab-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .dim-intro-question-count {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .btn-dim-continue {
+      padding: 16px 48px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: white;
+      cursor: pointer;
+      transition: all 0.18s;
+      box-shadow: 0 6px 20px rgba(91,94,244,0.35);
+    }
+    .btn-dim-continue:hover { background: #4a4dd4; transform: translateY(-2px); }
+
     @media (max-width: 480px) {
       .screen { padding: 16px 14px 40px; }
       .welcome-hero { padding: 36px 20px 32px; }
@@ -620,6 +747,20 @@
   </div>
 </div>
 
+<!-- ══════════════ DIM TRANSITION ══════════════ -->
+<div id="screen-dim-intro" class="screen">
+  <div class="dim-intro-progress" id="dimIntroProgress"></div>
+  <div class="dim-intro-card">
+    <div class="dim-intro-badge" id="dimIntroBadge"></div>
+    <div class="dim-intro-icon" id="dimIntroIcon"></div>
+    <div class="dim-intro-name" id="dimIntroName"></div>
+    <div class="dim-intro-desc" id="dimIntroDesc"></div>
+    <div class="dim-intro-ab" id="dimIntroAB"></div>
+  </div>
+  <div class="dim-intro-question-count" id="dimIntroCount"></div>
+  <button class="btn-dim-continue" id="btnDimContinue" onclick="resumeFromDimIntro()">开始作答 →</button>
+</div>
+
 <!-- ══════════════ CALCULATING ══════════════ -->
 <div id="screen-calc" class="screen">
   <div class="calc-spinner"></div>
@@ -673,18 +814,18 @@
 //  DATA: 100 QUESTIONS
 // ══════════════════════════════════════════════
 const DIMS = {
-  V: { name: '价值输出方式', color: '#5B5EF4', aEnd: '知识/方法型', bEnd: '情感/共鸣型' },
-  P: { name: '人格呈现距离', color: '#06b6d4', aEnd: '权威/专家型', bEnd: '平等/同频型' },
-  N: { name: '叙事驱动内核', color: '#10b981', aEnd: '观点/立场型', bEnd: '故事/经历型' },
-  F: { name: '内容领域策略', color: '#f59e0b', aEnd: '垂直深耕型', bEnd: '跨界博杂型' },
-  E: { name: '创作核心动力', color: '#ef4444', aEnd: '影响他人型', bEnd: '自我表达型' }
+  V: { name: '价值输出方式', color: '#5B5EF4', aEnd: '知识/方法型', bEnd: '情感/共鸣型', icon: '💡', desc: '你的内容以解决问题和输出知识为主，还是以情感共鸣和陪伴为主？' },
+  P: { name: '人格呈现距离', color: '#06b6d4', aEnd: '权威/专家型', bEnd: '平等/同频型', icon: '🎭', desc: '你在镜头前是权威专家、行业引领者，还是与粉丝平等同行的朋友？' },
+  N: { name: '叙事驱动内核', color: '#10b981', aEnd: '观点/立场型', bEnd: '故事/经历型', icon: '✍️', desc: '你的内容由鲜明观点和认知输出驱动，还是由真实故事和个人经历驱动？' },
+  F: { name: '内容领域策略', color: '#f59e0b', aEnd: '垂直深耕型', bEnd: '跨界博杂型', icon: '🗺️', desc: '你深耕一个垂直赛道，还是以个人为核心跨界分享生活的各个面向？' },
+  E: { name: '创作核心动力', color: '#ef4444', aEnd: '影响他人型', bEnd: '自我表达型', icon: '🔥', desc: '你创作的根本驱动力是影响和改变他人的认知，还是记录自我、表达成长？' }
 };
 
 const questions = [
   // ── V 维度（1-20）──
-  {d:'V', t:'当你准备发一篇关于职场升职的内容时，你倾向于：', a:'整理一套可复制的5步升职方法论，配合真实案例拆解', b:'分享自己被升职或被拒绝时的心路历程和复杂情绪'},
-  {d:'V', t:'粉丝留言说"好迷茫，不知道怎么办"，你最可能的回复是：', a:'给出3个具体的行动建议，帮他梳理思路', b:'先回应"我完全理解这种感受，我也经历过……"'},
   {d:'V', t:'你的一篇内容意外爆了，评论区主要是"说出了我的心声"。你下一篇内容会：', a:'把那个话题做深，出一篇系统性的方法干货', b:'继续挖掘同类情绪共鸣点，讲更多类似感受'},
+  {d:'V', t:'粉丝留言说"好迷茫，不知道怎么办"，你最可能的回复是：', a:'给出3个具体的行动建议，帮他梳理思路', b:'先回应"我完全理解这种感受，我也经历过……"'},
+  {d:'V', t:'当你准备发一篇关于职场升职的内容时，你倾向于：', a:'整理一套可复制的5步升职方法论，配合真实案例拆解', b:'分享自己被升职或被拒绝时的心路历程和复杂情绪'},
   {d:'V', t:'你在规划付费产品时，更愿意做的是：', a:'一套解决特定问题的课程或工具包（如：30天副业启动包）', b:'一个有温度的社群或陪伴型会员计划'},
   {d:'V', t:'当你发现某个话题很多人在谈，但大多数内容都是情绪宣泄时，你的反应是：', a:'看到切入机会——做一篇有深度、给答案的内容', b:'觉得有共鸣基础——加入这场情绪讨论，说出大家的感受'},
   {d:'V', t:'做选题时，你更容易对哪类内容产生创作冲动：', a:'"我发现了一个大多数人都不知道的方法/规律"', b:'"这件事让我很有感触，我想把这种感受说出来"'},
@@ -922,8 +1063,70 @@ function goNext() {
     showCalculating();
     return;
   }
+  // Show dimension intro screen at each boundary (after Q20, Q40, Q60, Q80)
+  const next = current + 1;
+  if (next % 20 === 0 && next < 100) {
+    current = next;
+    showDimIntro(dimOrder[next / 20]);
+    return;
+  }
   animateCard('fadeSlideIn');
   current++;
+  renderQuestion();
+}
+
+function showDimIntro(dimCode) {
+  const dimIndex = dimOrder.indexOf(dimCode); // 0-based index of the NEXT dim
+  const doneDims = dimOrder.slice(0, dimIndex);
+
+  // Progress dots
+  const prog = document.getElementById('dimIntroProgress');
+  prog.innerHTML = dimOrder.map((d, i) => {
+    const dim = DIMS[d];
+    const isDone = i < dimIndex;
+    const isNext = i === dimIndex;
+    const dotStyle = isDone || isNext
+      ? `background:${dim.color};border-color:${dim.color}`
+      : '';
+    const connector = i < dimOrder.length - 1
+      ? `<div class="dim-connector${isDone ? ' done' : ''}"></div>`
+      : '';
+    return `
+      <div class="dim-intro-step">
+        <div class="dim-intro-step-dot${isDone ? ' done' : isNext ? ' next' : ''}" style="${dotStyle}">
+          ${isDone ? '✓' : d}
+        </div>
+        <div class="dim-intro-step-label${isNext ? ' next' : ''}">${dim.name.slice(0,2)}</div>
+      </div>
+      ${connector}`;
+  }).join('');
+
+  // Card content
+  const dim = DIMS[dimCode];
+  document.getElementById('dimIntroBadge').textContent = `第 ${dimIndex + 1} / 5 个维度`;
+  document.getElementById('dimIntroBadge').style.background = dim.color;
+  document.getElementById('dimIntroIcon').textContent = dim.icon;
+  document.getElementById('dimIntroName').textContent = dim.name;
+  document.getElementById('dimIntroName').style.color = dim.color;
+  document.getElementById('dimIntroDesc').textContent = dim.desc;
+  document.getElementById('dimIntroAB').innerHTML = `
+    <div class="dim-intro-ab-item">
+      <div class="dim-intro-ab-label" style="color:${dim.color}">A 端</div>
+      <div style="font-size:13px;color:var(--text)">${dim.aEnd}</div>
+    </div>
+    <div class="dim-intro-ab-item">
+      <div class="dim-intro-ab-label" style="color:var(--muted)">B 端</div>
+      <div style="font-size:13px;color:var(--text)">${dim.bEnd}</div>
+    </div>`;
+  document.getElementById('dimIntroCount').textContent =
+    `已完成 ${dimIndex * 20} / 100 题 · 接下来 20 道题`;
+
+  showScreen('dim-intro');
+}
+
+function resumeFromDimIntro() {
+  showScreen('quiz');
+  animateCard('fadeSlideIn');
   renderQuestion();
 }
 
