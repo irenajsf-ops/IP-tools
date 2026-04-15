@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP 定位测评 · 五维模型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5B5EF4;
+      --primary-light: #eeeeff;
+      --bg: #F5F5FF;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --radius: 20px;
+      --shadow: 0 4px 32px rgba(91,94,244,0.10);
+      --font: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .screen { display: none; width: 100%; max-width: 620px; padding: 24px 20px 48px; }
+    .screen.active { display: block; }
+
+    /* ─── WELCOME ─── */
+    .welcome-hero {
+      background: linear-gradient(135deg, #1a1a3e 0%, #5B5EF4 100%);
+      border-radius: var(--radius);
+      padding: 48px 32px 40px;
+      text-align: center;
+      color: white;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .welcome-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .welcome-hero h1 {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .welcome-hero p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.7;
+      position: relative;
+    }
+    .welcome-meta {
+      display: flex;
+      gap: 12px;
+      margin: 28px 0 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
+    .meta-tag {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .welcome-dimensions {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .welcome-dimensions h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .dim-list { display: flex; flex-direction: column; gap: 12px; }
+    .dim-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dim-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dim-info { flex: 1; }
+    .dim-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .dim-desc { font-size: 12px; color: var(--muted); }
+    .btn-start {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #5B5EF4, #7c6ef0);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 6px 24px rgba(91,94,244,0.35);
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(91,94,244,0.45); }
+    .btn-start:active { transform: translateY(0); }
+
+    /* ─── QUIZ ─── */
+    .quiz-header { margin-bottom: 24px; }
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #5B5EF4, #9b8ef8);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    .quiz-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .dim-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .dim-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .dim-dot-step {
+      width: 20px; height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .dim-dot-step.done { background: var(--primary); }
+    .dim-dot-step.active { background: #9b8ef8; }
+
+    .question-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      animation: fadeSlideIn 0.25s ease;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeSlideBack {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .question-num {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .question-text {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      color: var(--text);
+    }
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .option-btn {
+      width: 100%;
+      padding: 18px 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 15px;
+      font-family: var(--font);
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      line-height: 1.5;
+      transition: all 0.18s;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .option-letter {
+      width: 26px; height: 26px;
+      min-width: 26px;
+      background: var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.18s;
+      margin-top: 1px;
+    }
+    .option-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .option-btn:hover .option-letter {
+      background: var(--primary);
+      color: white;
+    }
+    .option-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .option-btn.selected .option-letter {
+      background: var(--primary);
+      color: white;
+    }
+    .quiz-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-back {
+      padding: 12px 20px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: var(--font);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-back:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-back.hidden { visibility: hidden; pointer-events: none; }
+    .btn-next {
+      padding: 14px 32px;
+      background: var(--primary);
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: white;
+      cursor: pointer;
+      transition: all 0.18s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .btn-next.ready { opacity: 1; pointer-events: auto; }
+    .btn-next.ready:hover { background: #4a4dd4; transform: translateY(-1px); }
+
+    /* ─── CALCULATING ─── */
+    #screen-calc {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      gap: 20px;
+    }
+    #screen-calc.active { display: flex; }
+    .calc-spinner {
+      width: 52px; height: 52px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .calc-text { font-size: 16px; color: var(--muted); }
+
+    /* ─── RESULT ─── */
+    .result-hero {
+      width: 100%;
+      height: 300px;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .result-hero-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+    }
+    .result-hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.18);
+    }
+    .result-hero-content {
+      position: relative;
+      text-align: center;
+      color: white;
+      padding: 20px;
+    }
+    .result-hero-icon { font-size: 64px; margin-bottom: 8px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+    .result-hero-title {
+      font-size: 28px;
+      font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+    .result-hero-code {
+      font-size: 13px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-top: 10px;
+      display: inline-block;
+      backdrop-filter: blur(4px);
+      letter-spacing: 1px;
+    }
+    .placeholder-label {
+      position: absolute;
+      bottom: 12px; right: 14px;
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.7);
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+    .result-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+    .result-bigv {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .bigv-label {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    .bigv-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .bigv-tag { font-size: 13px; color: var(--muted); }
+    .result-desc {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #374151;
+    }
+
+    .scores-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .score-row { margin-bottom: 16px; }
+    .score-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+    .score-dim-label {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .score-dim-code {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+    }
+    .score-dim-name { font-size: 13px; color: var(--text); }
+    .score-side {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .score-side span { font-weight: 600; color: var(--primary); }
+    .score-bar-bg {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s cubic-bezier(.25,.8,.25,1);
+    }
+    .score-endpoints {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .result-strategy { margin-bottom: 24px; }
+    .scores-title, .strategy-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .strategy-list { display: flex; flex-direction: column; gap: 10px; }
+    .strategy-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .strategy-dot {
+      width: 6px; height: 6px;
+      min-width: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin-top: 7px;
+    }
+
+    .result-actions { display: flex; gap: 12px; }
+    .btn-retake {
+      flex: 1;
+      padding: 16px;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-retake:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-copy {
+      flex: 1;
+      padding: 16px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: white;
+      cursor: pointer;
+      transition: all 0.18s;
+      box-shadow: 0 4px 16px rgba(91,94,244,0.3);
+    }
+    .btn-copy:hover { background: #4a4dd4; transform: translateY(-1px); }
+    .copy-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a2e;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      transition: transform 0.3s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .copy-toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .screen { padding: 16px 14px 40px; }
+      .welcome-hero { padding: 36px 20px 32px; }
+      .welcome-hero h1 { font-size: 24px; }
+      .question-card { padding: 24px 20px; }
+      .question-text { font-size: 16px; }
+      .option-btn { font-size: 14px; padding: 16px; }
+      .result-hero { height: 240px; }
+      .result-hero-icon { font-size: 50px; }
+      .result-hero-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ WELCOME ══════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-hero">
+    <div class="welcome-badge">五维 IP 定位模型</div>
+    <h1>找到你天生适合的<br>自媒体 IP 方向</h1>
+    <p>100 道真实自媒体决策情境<br>帮你厘清价值输出、人格呈现、叙事内核、领域策略与创作动力</p>
+    <div class="welcome-meta">
+      <span class="meta-tag">⏱ 约 15 分钟</span>
+      <span class="meta-tag">📋 100 道题</span>
+      <span class="meta-tag">🧭 5 个维度</span>
+    </div>
+  </div>
+  <div class="welcome-dimensions">
+    <h3>测评维度</h3>
+    <div class="dim-list">
+      <div class="dim-item">
+        <div class="dim-dot" style="background:#5B5EF4"></div>
+        <div class="dim-info">
+          <div class="dim-name">V · 价值输出方式</div>
+          <div class="dim-desc">你的内容以知识解决问题为主，还是以情感共鸣陪伴为主？</div>
+        </div>
+      </div>
+      <div class="dim-item">
+        <div class="dim-dot" style="background:#06b6d4"></div>
+        <div class="dim-info">
+          <div class="dim-name">P · 人格呈现距离</div>
+          <div class="dim-desc">你在镜头前是权威专家，还是平等同行的朋友？</div>
+        </div>
+      </div>
+      <div class="dim-item">
+        <div class="dim-dot" style="background:#10b981"></div>
+        <div class="dim-info">
+          <div class="dim-name">N · 叙事驱动内核</div>
+          <div class="dim-desc">你的内容由观点和立场驱动，还是由故事和经历驱动？</div>
+        </div>
+      </div>
+      <div class="dim-item">
+        <div class="dim-dot" style="background:#f59e0b"></div>
+        <div class="dim-info">
+          <div class="dim-name">F · 内容领域策略</div>
+          <div class="dim-desc">你深耕单一垂直领域，还是以个人为核心跨界分享？</div>
+        </div>
+      </div>
+      <div class="dim-item">
+        <div class="dim-dot" style="background:#ef4444"></div>
+        <div class="dim-info">
+          <div class="dim-name">E · 创作核心动力</div>
+          <div class="dim-desc">你创作是为了影响改变他人，还是记录表达自己？</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">开始测评 →</button>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="quiz-meta">
+      <div class="dim-badge" id="dimBadge">● V · 价值输出方式</div>
+      <div class="dim-dots" id="dimDots"></div>
+    </div>
+  </div>
+  <div class="question-card" id="questionCard">
+    <div class="question-num" id="questionNum">第 1 / 100 题</div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+  <div class="quiz-nav">
+    <button class="btn-back hidden" id="btnBack" onclick="goBack()">← 上一题</button>
+    <button class="btn-next" id="btnNext" onclick="goNext()">下一题 →</button>
+  </div>
+</div>
+
+<!-- ══════════════ CALCULATING ══════════════ -->
+<div id="screen-calc" class="screen">
+  <div class="calc-spinner"></div>
+  <div class="calc-text">正在分析你的 IP 特质…</div>
+</div>
+
+<!-- ══════════════ RESULT ══════════════ -->
+<div id="screen-result" class="screen">
+  <div class="result-hero" id="resultHero">
+    <div class="result-hero-bg" id="resultHeroBg"></div>
+    <div class="result-hero-overlay"></div>
+    <div class="result-hero-content">
+      <div class="result-hero-icon" id="resultIcon"></div>
+      <div class="result-hero-title" id="resultName"></div>
+      <div class="result-hero-code" id="resultCode"></div>
+    </div>
+    <div class="placeholder-label">配图占位符 · 待替换为 AI 生成插图</div>
+  </div>
+
+  <div class="result-section">
+    <div class="result-bigv">
+      <div class="bigv-label">参考大V</div>
+      <div>
+        <div class="bigv-name" id="resultBigV"></div>
+        <div class="bigv-tag" id="resultBigVTag"></div>
+      </div>
+    </div>
+    <div class="result-desc" id="resultDesc"></div>
+  </div>
+
+  <div class="result-section">
+    <div class="scores-title">五维得分</div>
+    <div id="scoreRows"></div>
+  </div>
+
+  <div class="result-section result-strategy">
+    <div class="strategy-title">策略建议</div>
+    <div class="strategy-list" id="strategyList"></div>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn-retake" onclick="retake()">重新测评</button>
+    <button class="btn-copy" onclick="copyResult()">复制结果</button>
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">✓ 结果已复制到剪贴板</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA: 100 QUESTIONS
+// ══════════════════════════════════════════════
+const DIMS = {
+  V: { name: '价值输出方式', color: '#5B5EF4', aEnd: '知识/方法型', bEnd: '情感/共鸣型' },
+  P: { name: '人格呈现距离', color: '#06b6d4', aEnd: '权威/专家型', bEnd: '平等/同频型' },
+  N: { name: '叙事驱动内核', color: '#10b981', aEnd: '观点/立场型', bEnd: '故事/经历型' },
+  F: { name: '内容领域策略', color: '#f59e0b', aEnd: '垂直深耕型', bEnd: '跨界博杂型' },
+  E: { name: '创作核心动力', color: '#ef4444', aEnd: '影响他人型', bEnd: '自我表达型' }
+};
+
+const questions = [
+  // ── V 维度（1-20）──
+  {d:'V', t:'当你准备发一篇关于职场升职的内容时，你倾向于：', a:'整理一套可复制的5步升职方法论，配合真实案例拆解', b:'分享自己被升职或被拒绝时的心路历程和复杂情绪'},
+  {d:'V', t:'粉丝留言说"好迷茫，不知道怎么办"，你最可能的回复是：', a:'给出3个具体的行动建议，帮他梳理思路', b:'先回应"我完全理解这种感受，我也经历过……"'},
+  {d:'V', t:'你的一篇内容意外爆了，评论区主要是"说出了我的心声"。你下一篇内容会：', a:'把那个话题做深，出一篇系统性的方法干货', b:'继续挖掘同类情绪共鸣点，讲更多类似感受'},
+  {d:'V', t:'你在规划付费产品时，更愿意做的是：', a:'一套解决特定问题的课程或工具包（如：30天副业启动包）', b:'一个有温度的社群或陪伴型会员计划'},
+  {d:'V', t:'当你发现某个话题很多人在谈，但大多数内容都是情绪宣泄时，你的反应是：', a:'看到切入机会——做一篇有深度、给答案的内容', b:'觉得有共鸣基础——加入这场情绪讨论，说出大家的感受'},
+  {d:'V', t:'做选题时，你更容易对哪类内容产生创作冲动：', a:'"我发现了一个大多数人都不知道的方法/规律"', b:'"这件事让我很有感触，我想把这种感受说出来"'},
+  {d:'V', t:'粉丝问你同一个问题超过10次，你会：', a:'录一个详细的教程视频或写一篇完整的攻略', b:'做一个Q&A直播，边聊边和大家一起探讨感受'},
+  {d:'V', t:'你账号的评论区里，让你最有成就感的留言类型是：', a:'"照你说的方法做了，真的有效！"', b:'"看你的内容，感觉有人懂我了"'},
+  {d:'V', t:'面对两个流量相当的选题：一个是"如何做到"的干货，一个是"我曾经历"的故事，你会选：', a:'干货——因为它能帮更多人解决实际问题', b:'故事——因为它能建立更真实的连接'},
+  {d:'V', t:'你计划做一个系列内容，框架是：', a:'围绕一个核心问题，拆成多个解法模块', b:'围绕一段经历，按时间线或情感起伏展开'},
+  {d:'V', t:'合作方找你做推广，你在准备内容时优先考虑的是：', a:'这个产品能解决粉丝的什么具体问题，怎么讲清楚', b:'这个产品和我的生活状态是否吻合，能否自然地融入日常'},
+  {d:'V', t:'你发现一个竞品账号涨粉很快，内容主要是情感共鸣向。你的第一反应是：', a:'分析他的内容结构，思考自己能否做出更有价值的差异化干货内容', b:'觉得他做得不错，也考虑在自己账号里增加一些情感类内容'},
+  {d:'V', t:'直播时，有人在评论区说"你能不能陪我聊聊，我最近很难过"，你会：', a:'简单给予安慰后，引导他说出具体问题，尝试给出建议', b:'停下原来的话题，认真倾听和陪伴他说话'},
+  {d:'V', t:'你在分析一个社会热点时，更倾向于：', a:'提出一个别人没想到的新角度或反常识结论', b:'说出那些"大家都感受到但没人说出来"的集体情绪'},
+  {d:'V', t:'粉丝反馈说你的内容"有用但不够温暖"，你会：', a:'认为这是风格定位，不一定需要改变', b:'认为这是重要信号，开始思考怎么增加情感温度'},
+  {d:'V', t:'你最理想的粉丝关系是：', a:'粉丝把你当领域专家，遇到问题第一个想到找你', b:'粉丝把你当朋友，觉得关注你就像身边多了个懂你的人'},
+  {d:'V', t:'你准备拍一条关于"失业"话题的内容，脚本方向会是：', a:'"失业后的90天行动计划：从慌乱到重启的实操路径"', b:'"失业的第7天，我终于允许自己崩溃了一次"'},
+  {d:'V', t:'在内容结尾，你习惯怎么收尾：', a:'给出3点总结或行动清单，让用户带走明确的收获', b:'留一个开放性问题或感受，邀请粉丝在评论区分享自己的经历'},
+  {d:'V', t:'你认为自己内容的核心价值是：', a:'帮粉丝省时间、少走弯路、解决具体问题', b:'让粉丝感到被理解、不孤单、有共鸣'},
+  {d:'V', t:'当你思考"我为什么要做这个账号"时，驱动你最深的答案是：', a:'我有很多有价值的知识/方法想分享给需要的人', b:'我想找到和我有相似经历或感受的人，互相陪伴'},
+
+  // ── P 维度（21-40）──
+  {d:'P', t:'你在发布内容时，标题的口吻通常是：', a:'"3个方法让你……""绝大多数人都错了的……"', b:'"我最近发现……""说说我自己的……"'},
+  {d:'P', t:'有粉丝在评论区公开质疑你的观点，你通常会：', a:'认真回应，用数据或逻辑捍卫自己的立场', b:'说"你说得也有道理，我来说说我的角度"，保持开放态度'},
+  {d:'P', t:'你在自我介绍时，更倾向于强调：', a:'你的专业背景、成就和资质（如：10年经验、服务过500家企业）', b:'你和粉丝的相似性（如：普通打工人、也在摸索中）'},
+  {d:'P', t:'当你公开犯了一个错误，你的处理方式是：', a:'发一篇分析帖，复盘原因、纠正观点，保持专业形象', b:'坦诚承认"我错了，当时是这么想的……"，展示真实的自我'},
+  {d:'P', t:'粉丝说"你太厉害了，我永远都达不到你的水平"，你最可能的回应是：', a:'解释自己也是通过系统的方法论做到的，方法是可学的', b:'说"其实我和你一样，只是早走了几步，你完全可以做到"'},
+  {d:'P', t:'你在直播中的状态通常是：', a:'有明确的内容结构和主题，按节奏推进，像一场有价值的课', b:'随意聊天，跟着评论区走，像和朋友一起消磨时光'},
+  {d:'P', t:'你发布的内容中，"我"的形象通常是：', a:'站在前面指路的人——我见过更多、走得更远', b:'和你并肩同行的人——我也在探索，和你一样'},
+  {d:'P', t:'关于个人生活的内容，你更倾向于：', a:'分享那些能体现专业判断力或生活质感的部分', b:'分享日常的真实状态，包括糟糕的、普通的、无聊的'},
+  {d:'P', t:'粉丝问"你觉得我应该怎么办"，你的回答风格是：', a:'给出明确的建议和判断，让对方有方向感', b:'说"你觉得呢？你内心其实已经有答案了吗？"'},
+  {d:'P', t:'你认为粉丝信任你的主要原因是：', a:'你的内容质量高、观点准确、经验扎实', b:'你足够真实，粉丝觉得你不端着、像自己人'},
+  {d:'P', t:'面对无理取闹的负面评论，你的处理方式是：', a:'如果是误解，专业地解释清楚；如果无理，直接删除屏蔽', b:'先搞清楚对方为什么会有这种反应，即使对方情绪激动也先共情'},
+  {d:'P', t:'当你在内容中提到"我认为"时，你的语气倾向于：', a:'有信心地表达，这是我研究后的结论', b:'留有余地，"这只是我自己的看法，你怎么想？"'},
+  {d:'P', t:'你更认同哪种账号定位：', a:'我是某个领域的专家，粉丝来这里获取专业知识', b:'我是一个真实的人，粉丝来这里感受真实的生活'},
+  {d:'P', t:'在镜头前，你更自然的状态是：', a:'有准备地表达，确保信息准确、有逻辑', b:'随性表达，包括卡壳、想到哪说到哪的真实感'},
+  {d:'P', t:'你的账号头像和简介风格倾向于：', a:'专业形象照 + 强调资历/成果的简介', b:'生活感照片 + 平实接地气的自我描述'},
+  {d:'P', t:'粉丝把你当偶像崇拜，你的感受是：', a:'这是一种认可，说明内容有价值，适当的距离感是正常的', b:'有些不舒服，我更希望我们是平等的关系'},
+  {d:'P', t:'当你的粉丝数量大幅增长后，与早期粉丝的互动方式：', a:'基本保持一致，专注内容质量，无法给每个人单独互动', b:'会特别照顾老粉，保持那种熟悉的亲近感，不让他们觉得生疏'},
+  {d:'P', t:'你认为"人设"对于自媒体账号的意义：', a:'人设是专业形象的延伸，需要刻意维护和强化', b:'人设就是真实的自己，最好的人设就是没有人设'},
+  {d:'P', t:'在文案语气上，你更习惯用：', a:'"你应该……""建议你……""正确的做法是……"', b:'"我个人觉得……""我是这么做的……""不知道你有没有类似的感受"'},
+  {d:'P', t:'你最希望粉丝在看完你的内容后说：', a:'"这个人真的很懂，我要把他的内容全看完"', b:'"这个人好真实，感觉和我好像"'},
+
+  // ── N 维度（41-60）──
+  {d:'N', t:'你拿到一个选题"年轻人为什么越来越累"，你的第一反应是：', a:'我对这个话题有一个独特的判断，我想表达这个观点', b:'我想讲一讲自己或身边人在这件事上的真实经历'},
+  {d:'N', t:'你的内容框架更接近哪种：', a:'提出观点 → 拆解论据 → 得出结论', b:'事情起因 → 过程变化 → 我的感悟'},
+  {d:'N', t:'一个话题你有观点，但没有亲身经历，你会：', a:'照样写，收集资料、论证观点，个人经历不是必须的', b:'觉得缺少底气，想先找到自己的切身体验再写'},
+  {d:'N', t:'你回看自己发布的内容，哪类你更满意：', a:'那些提出了清晰判断、帮粉丝建立新认知的内容', b:'那些记录了真实经历、有细节有温度的内容'},
+  {d:'N', t:'当你面对一个争议性话题时，你更倾向于：', a:'明确表明立场，即使可能得罪一部分人', b:'用自己的经历切入，让读者自己判断，不急于给结论'},
+  {d:'N', t:'你的内容里出现频率更高的结构是：', a:'"大多数人认为X，但真相是Y"', b:'"那天发生了一件事……我开始重新思考……"'},
+  {d:'N', t:'当你看到一个爆款内容，你的分析重点是：', a:'它的核心观点是什么，为什么这个判断击中了读者', b:'它的故事是如何展开的，哪个细节让人有代入感'},
+  {d:'N', t:'粉丝说"你说的那些道理我都懂，但我更想知道你是怎么做到的"，你会：', a:'把方法论讲得更清楚，用案例辅助，让逻辑更完整', b:'开始讲你实际操作的过程，包括失败和混乱的细节'},
+  {d:'N', t:'你认为好的自媒体内容，核心是：', a:'有一个让人信服的核心观点或反常识结论', b:'有一个让人感同身受的真实故事或情节'},
+  {d:'N', t:'做选题时，下面哪种角度让你更有创作欲：', a:'"我发现了一个大多数人都在犯的认知错误"', b:'"我经历了一件事，过程很曲折，值得记录下来"'},
+  {d:'N', t:'你在解释一个复杂概念时，习惯：', a:'先定义，再拆解，用类比或数据支撑', b:'先讲一个相关故事，让概念从故事里自然浮现'},
+  {d:'N', t:'你最长的内容通常是：', a:'深度分析某个现象或观点的长文/长视频', b:'记录某段经历或成长过程的vlog/连载'},
+  {d:'N', t:'当内容没有达到预期效果，你的反思是：', a:'我的观点逻辑不够清晰，或者角度不够新颖', b:'我的故事叙述不够吸引人，或者细节不够真实'},
+  {d:'N', t:'你在内容中引用他人的话时，更多是为了：', a:'支撑你的观点，增加论证的可信度', b:'丰富故事背景，让叙述更有层次感'},
+  {d:'N', t:'你认为爆款内容的核心要素是：', a:'一个足够尖锐、足够有颠覆性的观点', b:'一个足够真实、足够有代入感的故事'},
+  {d:'N', t:'你在创作前的准备工作通常是：', a:'梳理论点、找数据、构建逻辑框架', b:'回忆相关经历、寻找有代表性的细节'},
+  {d:'N', t:'如果达到理想创作状态，粉丝最常说你内容的特点是：', a:'"有深度，每次看完都有新收获"', b:'"有真实感，感觉是在看一个真实的人的故事"'},
+  {d:'N', t:'在面对一个你没有深度研究的话题，你更可能：', a:'先做研究，形成独立判断后再发', b:'以"我正在探索这个话题"为角度，记录探索过程本身'},
+  {d:'N', t:'你认为自己内容里最难被竞争者复制的部分是：', a:'你独特的认知框架和看问题的方式', b:'你独特的人生经历和成长轨迹'},
+  {d:'N', t:'对于内容的修改，你更在意的是：', a:'观点是否足够准确、论证是否足够严密', b:'故事是否足够流畅、情感是否足够真实'},
+
+  // ── F 维度（61-80）──
+  {d:'F', t:'你在为账号选定方向时，更倾向于：', a:'聚焦一个领域，把它做深做透，成为那个领域的代名词', b:'以我这个人为核心，分享生活中各个方面的内容'},
+  {d:'F', t:'粉丝关注你，你认为主要是因为：', a:'你在某个具体领域持续输出高质量内容', b:'你这个人有意思，不管你发什么他们都想看'},
+  {d:'F', t:'你看到自己主业领域以外的热点话题，你会：', a:'克制不发，因为不在自己的领域范围内，会稀释定位', b:'发，因为有想法就应该表达，不必局限于某个领域'},
+  {d:'F', t:'你在一个月内发布的内容，话题范围：', a:'基本集中在同一个核心领域，从不同角度切入', b:'跨越多个话题，有时是工作，有时是生活，有时是旅行'},
+  {d:'F', t:'当你发现粉丝群体有各种不同的兴趣需求时，你会：', a:'聚焦核心粉丝的核心需求，不试图满足所有人', b:'尝试拓展内容类型，满足粉丝的多元需求'},
+  {d:'F', t:'你最不能接受的账号状态是：', a:'账号内容越来越散，失去了清晰的定位', b:'账号内容越来越窄，感觉越来越像一个专业说明书'},
+  {d:'F', t:'你的变现路径主要依赖：', a:'在某个领域建立权威，推出与该领域强相关的产品或服务', b:'依靠个人影响力，接受各类调性合适的品牌合作或跨界项目'},
+  {d:'F', t:'当你对某个新领域产生浓厚兴趣，你会：', a:'克制，因为涉足新领域可能稀释账号定位', b:'果断尝试，在账号上公开探索这个新领域'},
+  {d:'F', t:'你理想中的账号，一年后应该是：', a:'成为某个垂直领域的头部，粉丝提到这个领域就想到我', b:'积累一批真正喜欢我这个人的铁杆粉丝，不管我做什么都会看'},
+  {d:'F', t:'你如何看待账号的"内容标签"：', a:'标签很重要，清晰的标签能让平台和用户快速认知你的价值', b:'标签是一种限制，我不想被某个标签框死'},
+  {d:'F', t:'在算法推荐时代，你认为账号成功的关键是：', a:'持续在某个垂直领域产出高价值内容，获得精准推流', b:'建立足够强的个人IP，让用户主动搜索和传播'},
+  {d:'F', t:'你在安排内容日历时，通常：', a:'按主题系列规划，每个系列深入一个话题，有长线节奏', b:'随心情和生活状态决定下一篇发什么，保持灵活'},
+  {d:'F', t:'当某个非主业内容意外爆了，你会：', a:'分析爆款原因，谨慎评估是否值得占用精力继续做', b:'顺势跟进，既然粉丝喜欢，就多做几条同类内容'},
+  {d:'F', t:'你认为自己的竞争优势主要来自：', a:'在某个领域的深度积累，是别人无法快速复制的护城河', b:'个人魅力和生活方式，是独属于我这个人的独特性'},
+  {d:'F', t:'关于"跨界"，你的态度是：', a:'跨界有风险，需要慎重，不能随意稀释定位', b:'跨界是一种创造力，我的成长轨迹本来就不是线性的'},
+  {d:'F', t:'你在选择品牌合作对象时，首要标准是：', a:'对方是否和我的垂直领域高度相关', b:'对方的品牌调性是否和我的个人风格契合'},
+  {d:'F', t:'你的历史内容如果被新粉丝翻看，他们会：', a:'迅速了解你在某个领域的核心观点和专业深度', b:'认识一个立体的、多维度的、有趣的人'},
+  {d:'F', t:'你认为最理想的粉丝画像是：', a:'对我所在领域有明确需求的人群，精准且高价值', b:'和我年龄相仿、生活状态相似、喜欢我这个人的人群'},
+  {d:'F', t:'当账号定位和内容灵感发生冲突时，你会：', a:'遵守定位，这个内容不适合在这个账号发', b:'尊重灵感，发出来，粉丝会理解的'},
+  {d:'F', t:'你看待内容质量的标准是：', a:'在我的领域里，这条内容是否达到了应有的专业深度', b:'这条内容是否足够真实地展现了我当下的状态和想法'},
+
+  // ── E 维度（81-100）──
+  {d:'E', t:'你开始做自媒体的最初动机是：', a:'我有一些想法和知识，想通过内容影响更多人', b:'我想记录自己的生活和成长，顺便找到同频的人'},
+  {d:'E', t:'当你一篇内容发出去没什么水花，你的心情：', a:'有些沮丧，因为内容没有影响到足够多的人', b:'还好，因为创作过程本身就有价值，发出去只是附带'},
+  {d:'E', t:'你在创作时最享受的时刻是：', a:'把一个复杂的问题整理清楚，感觉"这条内容一定会帮到很多人"', b:'找到了一个完美的表达方式，把自己想说的精准说出来了'},
+  {d:'E', t:'当你发现你的观点改变了粉丝的某个认知，你的感受是：', a:'非常满足，这是我做内容最大的意义所在', b:'开心，但这不是我做内容的主要目的'},
+  {d:'E', t:'假如做自媒体永远不会有收入，你还会做吗？你的驱动力是：', a:'会，因为我有东西想传播，影响更多人本身就是目标', b:'会，因为创作和记录是我自己需要的，跟收入无关'},
+  {d:'E', t:'你在选题时更愿意做：', a:'粉丝迫切需要解决的问题，即使和你当前状态无关', b:'你当下正在经历或思考的事，不管粉丝是否有需求'},
+  {d:'E', t:'关于内容的"教育性"，你认为：', a:'好的内容应该让人学到东西，改变认知或行为', b:'好的内容应该让人产生共鸣，而不必然要教会他们什么'},
+  {d:'E', t:'你发内容后最想收到的反馈是：', a:'"你的内容让我改变了一个想法/做了一个重要决定"', b:'"你的内容让我感觉被看见了/说出了我说不出来的感受"'},
+  {d:'E', t:'你觉得自己和读者/观众之间的关系更像是：', a:'一个传递有价值信息的人和他的受益者', b:'一个开放日记本的人和愿意一起翻看的陌生人'},
+  {d:'E', t:'你在创作中感到"值得"的时刻：', a:'内容改变了某人的某个观点或帮助他们做出了某个决定', b:'把自己真实的状态完整地表达出来，不需要包装和美化'},
+  {d:'E', t:'当你面临"要迎合算法还是忠于自己的表达"这个两难，你通常：', a:'在坚持核心观点的前提下，优化表达方式以扩大影响力', b:'忠于自己的表达，算法不是创作的指挥棒'},
+  {d:'E', t:'你在做内容规划时，起点通常是：', a:'粉丝或市场最需要什么，我能提供什么价值', b:'我最近在想什么，有什么想说、想记录的'},
+  {d:'E', t:'你认为一个账号最终的价值是：', a:'在某个领域传播了有价值的观点和方法，影响了一批人', b:'留下了一段真实的生命记录，记录了一个人的成长轨迹'},
+  {d:'E', t:'当一个话题和你的专业方向无关，但你有强烈的表达冲动时，你会：', a:'克制，优先考虑这条内容对粉丝的价值，而不是我的表达欲', b:'发，因为那种表达冲动本身就是创作的理由'},
+  {d:'E', t:'你理想的账号成就感，来自于：', a:'你的内容被大量传播，改变了很多人对某件事的看法', b:'你的内容精准地说出了你想说的，找到了真正懂你的读者'},
+  {d:'E', t:'你在做内容时的自我审视方式：', a:'这条内容能为粉丝带来什么？值得他们花时间看吗？', b:'这条内容是否诚实地表达了我当下的真实想法？'},
+  {d:'E', t:'当你知道某种内容风格更容易涨粉，但不符合你的表达习惯，你会：', a:'做出适当调整，因为影响力的基础是让更多的人看到你', b:'坚持自己的风格，慢慢等待同频的人找到你'},
+  {d:'E', t:'你认为自媒体的本质是：', a:'一种影响世界的工具，关键是内容是否能改变人的认知', b:'一种记录和表达的方式，关键是是否真实地展现了自己'},
+  {d:'E', t:'当你的账号进入瓶颈期，没有增长，你的应对策略是：', a:'研究目标受众的需求，调整内容策略，重新找到影响力杠杆', b:'专注当下的创作状态，相信坚持做自己总会找到对的观众'},
+  {d:'E', t:'如果只能用一句话描述你做内容的核心动力，你会说：', a:'我有话要说，我想让更多人看到不同的可能性', b:'我在记录我的人生，创作是我和自己对话的方式'}
+];
+
+// ══════════════════════════════════════════════
+//  DATA: 32 RESULTS
+// ══════════════════════════════════════════════
+const results = {
+  'AAAAA': { name:'认知革命者', bigV:'罗振宇', bigVTag:'逻辑思维/得到App创始人', icon:'🎯', g:['#0f0c29','#6c63ff'], desc:'你的内容是知识改变认知的武器，每篇都指向"让读者想法升级"。权威专家姿态+垂直深耕+系统方法论，天然适合知识付费路径。你对影响他人认知有强烈使命感，是最典型的知识付费型IP。', tips:['体系化课程、训练营是你的变现黄金通道','适度增加叙事温度，避免权威感造成情感疏离'] },
+  'AAAAB': { name:'独立思想者', bigV:'梁文道', bigVTag:'看理想/文化评论人', icon:'🔭', g:['#1a1a3e','#3b82f6'], desc:'扎实的知识储备和独立的观察视角，但创作更多是与世界的私人对话。不以改变所有人为目的，反而形成了难以复制的思想品牌，吸引真正同频的精英粉丝。', tips:['找到那批真正需要你这个视角的小众精准读者','系列化内容让你的知识体系更清晰可见'] },
+  'AAABA': { name:'博学旗手', bigV:'高晓松', bigVTag:'晓说/晓松奇谈', icon:'🗺️', g:['#0a2342','#1e7c6b'], desc:'横跨多个领域的知识权威，以一人之力构建了完整的认知宇宙。每次跨界都带着专业深度，不是蜻蜓点水。你的影响力来自于知识的广度与权威感的结合。', tips:['用一个统一的认知内核串联你的跨界内容','长视频/播客比短内容更能展现你知识宇宙的全貌'] },
+  'AAABB': { name:'跨界知识分子', bigV:'许知远', bigVTag:'单向空间/十三邀', icon:'✒️', g:['#1c1c2e','#b8860b'], desc:'高密度知识和鲜明立场跨越多个领域，创作动力是表达自己对时代的独立判断。你可能不是最受欢迎的，但一定是最有辨识度的。慢积累出极忠实的深度粉丝群。', tips:['接受小众精准，而非追求泛流量','访谈/对话类内容能放大你的知识体系和思想魅力'] },
+  'AABAA': { name:'故事讲道人', bigV:'樊登', bigVTag:'樊登读书', icon:'📖', g:['#0d4f3c','#2eb872'], desc:'以故事为容器传递方法论，让知识更有温度、更易吸收。权威专家的身份背书+故事化叙事，是知识类IP最高效的信任建立模型。粉丝付费意愿强。', tips:['读书解读和案例拆解是你天然擅长的内容形式','建立稳定内容系列感，培养粉丝收看习惯'] },
+  'AABAB': { name:'学者叙事者', bigV:'吴军', bigVTag:'硅谷来信/科技作家', icon:'🏛️', g:['#2c3e50','#4a7fa5'], desc:'用亲历故事和历史叙事讲述深度知识，是严谨学者和有趣叙述者的结合体。垂直领域的亲历性内容是你最深的竞争壁垒。', tips:['书信/随笔形式最能发挥你的叙事优势','专注真正有切身经历的细分领域建立权威'] },
+  'AABBA': { name:'跨界说书人', bigV:'吴晓波', bigVTag:'吴晓波频道/财经作家', icon:'📜', g:['#3d1f00','#c07b35'], desc:'用历史故事解读当下，跨越财经、人文、历史的知识体系。权威感和叙事能力都极强，天然适合成为某个时代商业变迁的记录者。', tips:['打造具有时代感的IP，而非单纯的知识教程','跨界内容的连接点（如：商业与人文）是你的独特价值'] },
+  'AABBB': { name:'人文叙述家', bigV:'白岩松', bigVTag:'央视媒体人/公共知识分子', icon:'🌐', g:['#2d2d2d','#8b6914'], desc:'学识渊博、叙事流畅、视野跨越多个人文领域，表达自己对世界的深度观察。天然带有公共知识分子气质，长内容是你的主场。', tips:['长内容深度创作更适合你，不要被短视频思维绑架','时代感和历史感是你区别于普通博主的核心资产'] },
+  'ABAAA': { name:'平民导师', bigV:'小Lin说', bigVTag:'财经科普博主', icon:'💡', g:['#1a3a6e','#3b82f6'], desc:'把复杂知识用普通人都能懂的方式说清楚，既有干货深度，又没有权威距离感。这是知识IP里粉丝黏性最高、增长最快的形态之一。', tips:['变现适合做入门级知识产品，覆盖更广泛的初级学习者','保持同频口吻，不要随粉丝增长而无意间端起架子'] },
+  'ABAAB': { name:'独立发声者', bigV:'和菜头', bigVTag:'槽边往事/科技文化评论', icon:'🎙️', g:['#1e2a3e','#4a6fa5'], desc:'有独立思想和知识深度，但创作是自我表达，不讨好大众。平等口吻和独特视角共同构成了辨识度极高的个人风格。忠实粉丝会因你的真实性长期追随。', tips:['别为了增粉妥协风格，你的忠粉会长期留下','垂直赛道的长期深耕能形成极强的搜索型护城河'] },
+  'ABABA': { name:'犀利评论家', bigV:'半佛仙人', bigVTag:'B站财经/社会评论博主', icon:'⚡', g:['#0f172a','#2563eb'], desc:'知识密度高、观点辛辣、跨界能力强，且对大众传播有明确的野心。这类IP能在短期内快速打出影响力，但需要持续输出新鲜观点维持热度。', tips:['合理经营内容争议性，适度争议能持续拉高关注度','培养团队化内容生产能力，避免单人输出枯竭'] },
+  'ABABB': { name:'跨界观察者', bigV:'连岳', bigVTag:'专栏作家', icon:'🌿', g:['#1e3a2a','#4a8c6a'], desc:'横跨多个领域的知识型创作者，口吻平等，观点鲜明，更多是表达自我对生活的独立判断。创作是生活方式，不是流量游戏。', tips:['内容适合做长期订阅产品，粉丝黏性高于泛流量账号','找到贯穿跨界内容的个人价值观主线，是长期IP的核心'] },
+  'ABBAA': { name:'科普传教士', bigV:'李永乐', bigVTag:'B站科普老师', icon:'🔬', g:['#0e4d6e','#0ea5e9'], desc:'以平等亲切的方式传播知识，故事和类比是你的叙事武器。垂直深耕+同频传递，是最受欢迎的知识类IP之一。粉丝从入门到忠实的转化路径清晰。', tips:['视频化内容比图文更能展现你的表达力','打造细分领域的"入门必看"资源，构建搜索流量护城河'] },
+  'ABBAB': { name:'趣味解说员', bigV:'混子哥', bigVTag:'半小时漫画/历史科普', icon:'🎨', g:['#1a3a1a','#4ade80'], desc:'用好玩的故事和独特形式让复杂知识变得有趣，完全不端架子。垂直深耕一个领域，用自己最舒服的方式持续创作。IP识别度极高。', tips:['做出格式辨识度极高的内容系列，形成IP符号','改编授权、出版、线下活动是这类IP的天然延伸'] },
+  'ABBBA': { name:'跨界创作人', bigV:'何同学', bigVTag:'B站科技创意up主', icon:'🚀', g:['#2d1b69','#db2777'], desc:'以故事和项目记录为核心叙事，跨越多个领域，同频年轻人，有明确的传播野心。作品往往是现象级传播，而非日常更新。精品策略是你的定位。', tips:['宁可精不可多，每一次发布都应是品质之作','品牌合作时注重创意联名，而非普通植入'] },
+  'ABBBB': { name:'知识漫游者', bigV:'姜思达', bigVTag:'媒体人/访谈创作者', icon:'🧭', g:['#3b1f5e','#a78bfa'], desc:'知识性与故事性兼备，完全同频，跨界探索，创作是表达自我对人和世界的好奇心。永远不知道下一期会是什么，但一定值得看。', tips:['保持高品质和稀缺感，不必追求高更新频率','用独特视角和提问方式建立IP识别度'] },
+  'BAAAA': { name:'情感意见领袖', bigV:'咪蒙', bigVTag:'情感/职场/女性公众号', icon:'🔥', g:['#4a0c2e','#c73535'], desc:'情感共鸣是内容入口，强观点是核心武器。权威口吻+垂直赛道+强变现意识，是自媒体影响力最强的IP形态之一。同时也是最需要内容边界意识的形态。', tips:['精准踩中目标用户的情绪燃点是你的核心技能','建立内容安全边界意识，避免观点过激带来的平台风险'] },
+  'BAAAB': { name:'灵性启蒙者', bigV:'张德芬', bigVTag:'身心灵作家', icon:'🌸', g:['#3b0764','#c026d3'], desc:'以情感共鸣打开读者心门，用权威专业身份建立信任，垂直深耕身心灵/自我成长领域。创作既是修行也是自我表达，粉丝的精神依赖度极高。', tips:['线下课程和社群是你最高价值的变现路径','持续的自我成长故事能让粉丝随时间深度追随'] },
+  'BAABA': { name:'文化跨界思想者', bigV:'冯唐', bigVTag:'作家/医生/顾问', icon:'🍷', g:['#4a1942','#b45309'], desc:'情感化的文学表达跨越多个领域，权威气质浓厚，有鲜明的世界观和人生观。以影响他人的生命哲学为驱动力，内容极具个人烙印。', tips:['书籍、演讲和高客单价私董会是你的自然变现路径','保持内容的不可预测性，是维持高关注度的关键'] },
+  'BAABB': { name:'情感跨界写作人', bigV:'刘同', bigVTag:'青春文学作家/前媒体人', icon:'🌅', g:['#7c2d12','#ea580c'], desc:'情感共鸣型内容跨越多个生活领域，有权威感但不失温度，更多是记录和表达自己的人生阶段。这类IP随创作者年龄增长会呈现不同深度。', tips:['随人生阶段更新内容方向，是这类IP的天然成长节奏','出版和品牌合作是传统优势变现渠道'] },
+  'BABAA': { name:'心灵疗愈者', bigV:'武志红', bigVTag:'心理咨询师/得到专栏', icon:'🫶', g:['#064e3b','#0d9488'], desc:'情感疗愈是核心价值，权威专家背书，用案例故事深入心理赛道，以改变中国人心理认知为使命。这类IP的粉丝忠诚度和付费意愿都极高。', tips:['咨询转介绍和精品课程是高价值变现路径','培养有辨识度的核心理论框架，形成专属方法论品牌'] },
+  'BABAB': { name:'内在探索者', bigV:'胡慎之', bigVTag:'亲子/家庭心理咨询师', icon:'🪞', g:['#1e3a2a','#7c3aed'], desc:'深耕心理/关系领域，以专业权威身份分享案例故事，但创作动力更多来自自我探索和体悟分享。内容往往有独特的个人烙印。', tips:['内容+社群+付费咨询的三层结构适合你','定期做自我创作复盘，防止内容风格固化'] },
+  'BABBA': { name:'人生叙事引导者', bigV:'王潇', bigVTag:'斜杠女性/作家', icon:'🌺', g:['#7f1d1d','#d97706'], desc:'用自己的人生经历故事引导他人成长，跨越职业、情感、身体多个维度，以权威导师姿态影响目标群体。女性成长赛道最典型的IP形态。', tips:['女性赋能社群和营地是你的高价值变现场景','定期迭代你的人生阶段叙事，让粉丝与你同步成长'] },
+  'BABBB': { name:'生活美学讲述者', bigV:'张小娴', bigVTag:'香港情感作家', icon:'🌷', g:['#831843','#f472b6'], desc:'以情感为主轴，用故事化散文构建跨越爱情、生活、美学的内容宇宙，权威而温柔，自我表达是最大驱动力。粉丝陪伴周期极长。', tips:['书籍出版和品牌授权是长期稳定的变现方式','保持内容的文学质感，这是你最不可替代的核心资产'] },
+  'BBAAA': { name:'情感观点领袖', bigV:'王左中右', bigVTag:'文字/文案博主', icon:'✍️', g:['#7c2d12','#991b1b'], desc:'情感共鸣+平等同频+鲜明观点+垂直深耕，在特定细分领域制造强影响力。你的粉丝不只是被感动，更被你的观点所影响。', tips:['围绕核心观点开发系列内容，形成"观点品牌"','垂直领域内的深度知识付费产品会有高转化率'] },
+  'BBAAB': { name:'情感独白者', bigV:'卢思浩', bigVTag:'青春情感作家', icon:'📝', g:['#7c2d12','#c2410c'], desc:'深情共鸣的文字加上鲜明的人生观，垂直深耕青春情感赛道，创作是说出自己心里的话，找到懂你的人。长期坚持终将沉淀出极忠实的陪伴粉群。', tips:['出版、有声书、朗读类内容是你的天然延伸','不要为流量改变文字风格，你的独特性才是核心资产'] },
+  'BBABA': { name:'生活观点吐槽者', bigV:'papi酱', bigVTag:'短视频喜剧博主', icon:'🎭', g:['#78350f','#f59e0b'], desc:'以情感娱乐为外壳，生活观点为内核，同频普通人，跨越生活各方面。内容传播速度快、影响力大，是自媒体商业变现能力最强的IP形态之一。', tips:['广告植入和品牌联名是你的核心变现，流量是你的护城河','持续追踪社会热点，是这类IP保持活跃度的关键'] },
+  'BBABB': { name:'跨界情感观察者', bigV:'黎贝卡', bigVTag:'时尚/生活方式博主', icon:'💫', g:['#701a75','#ec4899'], desc:'情感化的生活方式内容，跨界探索时尚、旅行、文化，口吻同频真实，有鲜明的美学观点，创作驱动来自分享自己喜爱的生活。', tips:['高质量生活方式品牌合作是你的核心变现路径','保持内容的审美一致性，是这类IP最高的护城河'] },
+  'BBBAA': { name:'成长故事引领者', bigV:'古典', bigVTag:'新精英生涯/超级个体', icon:'🌱', g:['#14532d','#16a34a'], desc:'情感化的成长故事+垂直职业发展赛道+影响他人的使命感，是成长赛道最温暖有力的IP形态。你的内容让人感到被陪伴，也被引导。', tips:['社群、陪伴计划和年度营地是你的高价值变现场景','你的内容进化轨迹本身就是最好的IP叙事，不要刻意隐藏成长'] },
+  'BBBAB': { name:'青春情感记录者', bigV:'张皓宸', bigVTag:'青春文学作家', icon:'🌙', g:['#1e1b4b','#6366f1'], desc:'以真实的青春情感故事打动读者，垂直深耕情感赛道，同频年轻人，创作是自我表达。这类IP的粉丝是真正陪伴式的追随者。', tips:['实体出版和签名活动是极高价值的变现和粉丝运营方式','允许内容风格随年龄自然成熟，不要刻意维持"青春"标签'] },
+  'BBBBA': { name:'生活方式传播者', bigV:'李子柒', bigVTag:'传统文化/美食/手工博主', icon:'🌾', g:['#14532d','#b45309'], desc:'以情感意境和视觉美感记录生活，跨越农耕、美食、手工、节气的内容宇宙，同频向往田园的人，以传播某种价值观和生活美学为使命。', tips:['视觉调性和内容仪式感是最不可复制的护城河','文化IP授权、联名产品、海外传播是你的高价值延伸路径'] },
+  'BBBBB': { name:'生命记录者', bigV:'房琪kiki', bigVTag:'旅行情感vlog博主', icon:'🌊', g:['#0c4a6e','#0891b2'], desc:'五维均为B端的纯粹记录者——情感共鸣、同频真实、故事化叙事、跨界探索、自我表达，是最本真的IP形态。你的内容是一部正在书写的人生。', tips:['长期陪伴式粉丝是你最核心的资产，深度维系比广泛拉新更重要','允许内容随人生阶段自然演变，这是你IP最迷人的地方'] }
+};
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let current = 0;
+const answers = {};
+const dimOrder = ['V','P','N','F','E'];
+
+// ══════════════════════════════════════════════
+//  QUIZ LOGIC
+// ══════════════════════════════════════════════
+function startQuiz() {
+  showScreen('quiz');
+  renderQuestion();
+  renderDimDots();
+}
+
+function renderDimDots() {
+  const el = document.getElementById('dimDots');
+  el.innerHTML = dimOrder.map((d,i) => `<div class="dim-dot-step" id="dot-${d}"></div>`).join('');
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  const totalAnswered = Object.keys(answers).length;
+
+  // Progress
+  document.getElementById('progressFill').style.width = (current / 100 * 100) + '%';
+  document.getElementById('questionNum').textContent = `第 ${current + 1} / 100 题`;
+
+  // Dim badge
+  const dim = DIMS[q.d];
+  document.getElementById('dimBadge').innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${dim.color};display:inline-block"></span>&nbsp;${q.d} · ${dim.name}`;
+
+  // Dim dots
+  dimOrder.forEach((d, i) => {
+    const dot = document.getElementById('dot-' + d);
+    if (!dot) return;
+    const start = i * 20;
+    if (current >= start + 20) { dot.classList.add('done'); dot.classList.remove('active'); }
+    else if (current >= start) { dot.classList.add('active'); dot.classList.remove('done'); }
+    else { dot.classList.remove('done','active'); }
+  });
+
+  // Question text
+  document.getElementById('questionText').textContent = q.t;
+
+  // Options
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  ['a','b'].forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (answers[current] === opt ? ' selected' : '');
+    btn.innerHTML = `<span class="option-letter">${opt.toUpperCase()}</span><span>${q[opt]}</span>`;
+    btn.onclick = () => selectAnswer(opt);
+    container.appendChild(btn);
+  });
+
+  // Nav
+  document.getElementById('btnBack').classList.toggle('hidden', current === 0);
+  updateNextBtn();
+}
+
+function selectAnswer(opt) {
+  answers[current] = opt;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === (opt === 'a' ? 0 : 1));
+  });
+  updateNextBtn();
+  // Auto-advance after brief delay
+  setTimeout(goNext, 420);
+}
+
+function updateNextBtn() {
+  const btn = document.getElementById('btnNext');
+  const hasAnswer = answers[current] !== undefined;
+  btn.classList.toggle('ready', hasAnswer);
+  btn.textContent = current === 99 ? '查看结果 →' : '下一题 →';
+}
+
+function animateCard(name) {
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = `${name} 0.25s ease`;
+}
+
+function goNext() {
+  if (answers[current] === undefined) return;
+  if (current >= 99) {
+    showCalculating();
+    return;
+  }
+  animateCard('fadeSlideIn');
+  current++;
+  renderQuestion();
+}
+
+function goBack() {
+  if (current === 0) return;
+  animateCard('fadeSlideBack');
+  current--;
+  renderQuestion();
+}
+
+function showCalculating() {
+  showScreen('calc');
+  setTimeout(showResult, 1400);
+}
+
+// ══════════════════════════════════════════════
+//  RESULT LOGIC
+// ══════════════════════════════════════════════
+function calcScores() {
+  const scores = { V:0, P:0, N:0, F:0, E:0 };
+  questions.forEach((q, i) => {
+    if (answers[i] === 'a') scores[q.d]++;
+  });
+  return scores;
+}
+
+function showResult() {
+  const scores = calcScores();
+  const code = dimOrder.map(d => scores[d] >= 12 ? 'A' : 'B').join('');
+  const r = results[code] || results['BBBBB'];
+
+  // Hero
+  document.getElementById('resultHeroBg').style.background =
+    `linear-gradient(135deg, ${r.g[0]} 0%, ${r.g[1]} 100%)`;
+  document.getElementById('resultIcon').textContent = r.icon;
+  document.getElementById('resultName').textContent = r.name;
+
+  // Code display
+  const codeStr = dimOrder.map((d,i) => `${d}:${code[i]}`).join('  ');
+  document.getElementById('resultCode').textContent = codeStr;
+
+  // Big V
+  document.getElementById('resultBigV').textContent = r.bigV;
+  document.getElementById('resultBigVTag').textContent = r.bigVTag;
+
+  // Desc
+  document.getElementById('resultDesc').textContent = r.desc;
+
+  // Score bars
+  const scoreRows = document.getElementById('scoreRows');
+  scoreRows.innerHTML = dimOrder.map(d => {
+    const s = scores[d];
+    const isA = s >= 12;
+    const pct = Math.round(s / 20 * 100);
+    const dim = DIMS[d];
+    return `
+      <div class="score-row">
+        <div class="score-row-header">
+          <div class="score-dim-label">
+            <div class="score-dim-code" style="background:${dim.color}">${d}</div>
+            <div class="score-dim-name">${dim.name}</div>
+          </div>
+          <div class="score-side">${s}/20 &nbsp;<span>${isA ? dim.aEnd : dim.bEnd}</span></div>
+        </div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill" style="width:0%;background:${dim.color}" data-width="${pct}%"></div>
+        </div>
+        <div class="score-endpoints"><span>${dim.aEnd}</span><span>${dim.bEnd}</span></div>
+      </div>`;
+  }).join('');
+
+  // Strategy
+  document.getElementById('strategyList').innerHTML = r.tips.map(t =>
+    `<div class="strategy-item"><div class="strategy-dot"></div><div>${t}</div></div>`
+  ).join('');
+
+  showScreen('result');
+
+  // Animate bars after paint
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+
+  window._resultData = { r, scores, code };
+}
+
+function retake() {
+  current = 0;
+  Object.keys(answers).forEach(k => delete answers[k]);
+  showScreen('welcome');
+}
+
+function copyResult() {
+  const { r, scores, code } = window._resultData;
+  const lines = [
+    `【IP定位测评结果】`,
+    ``,
+    `IP 原型：${r.name}`,
+    `参考大V：${r.bigV}（${r.bigVTag}）`,
+    `编码：${code}`,
+    ``,
+    `五维得分：`,
+    ...dimOrder.map(d => {
+      const s = scores[d];
+      const dim = DIMS[d];
+      return `  ${d}·${dim.name}：${s}/20（${s>=12 ? dim.aEnd : dim.bEnd}）`;
+    }),
+    ``,
+    `${r.desc}`,
+    ``,
+    `策略建议：`,
+    ...r.tips.map(t => `  · ${t}`)
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  SCREEN SWITCH
+// ══════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
